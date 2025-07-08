@@ -24,11 +24,16 @@ cd nome-do-repositorio
 ```
 
 ### 2. Crie um ambiente virtual (opcional, mas recomendado)
-```bash
-python -m venv venv
-source venv/bin/activate  # Linux/macOS
-venv\Scripts\activate     # Windows
-deactivate #desativar ambiente virtual
+python -m venv env  # Cria a pasta do ambiente virtual com o nome 'env'
+
+# Ativar o ambiente virtual:
+``` bash
+source env/bin/activate     # Para Linux/macOS
+env\Scripts\activate        # Para Windows (no Prompt de Comando)
+. env/bin/activate          # Alternativa para alguns shells Unix/Linux
+
+# Desativar o ambiente virtual:
+deactivate
 ```
 
 ### 3. Instale as dependências
@@ -92,9 +97,9 @@ Authorization: Bearer SEU_TOKEN
 |--------|--------------------|-------------------------------|
 | POST   | /livros            | Cadastra um novo livro        |
 | GET    | /livros            | Retorna todos os livros       |
-| GET    | /livros/<id>       | Retorna um livro específico   |
-| PUT    | /livros/<id>       | Edita um livro                |
-| DELETE | /livros/<id>       | Exclui um livro               |
+| GET    | /livros/<isbn>     | Retorna um livro específico   |
+| PUT    | /livros/<isbn>     | Edita um livro                |
+| DELETE | /livros/<isbn>     | Exclui um livro               |
 | POST   | /cadastro          | Cria um novo usuário          |
 | POST   | /login             | Autentica e retorna um token  |
 | GET    | /perfil            | Acessa dados do usuário (JWT) |
@@ -145,18 +150,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 ---
 
-## 📌 Observações
-
-- ✅ Evite usar a chave `JWT_SECRET_KEY = "123456"` em produção.
-- 🔐 Sempre use HTTPS em ambientes reais para proteger os tokens.
-- 📦 Você pode adicionar bibliotecas extras como `python-dotenv` para configurar variáveis de ambiente.
-
----
-
 ## 📞 Contato
 
 Projeto desenvolvido por **Luiz Eduardo**  
-✉️ E-mail: [seuemail@dominio.com]  
-🐙 GitHub: [github.com/seu-usuario](https://github.com/seu-usuario)
+✉️ E-mail: [luizeduardo1953@gmail.com]  
+🐙 GitHub: [github.com/luizeduardo1953](https://github.com/luizeduardo1953)
 
 ---
