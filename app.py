@@ -32,12 +32,19 @@ usuarios_collection = db["usuarios"]
 @app.route('/livros', methods=['POST'])
 def incluir_novo_livro():
     try:
-        novo_livro = request.get_json()     
+        novo_livro = request.get_json()
+        
+        isbn = novo_livro.get('isbn')
+        
+        if not isbn:
+            return jsonify({"mensagem" : "Obrigatório informar o ISBN do livro!"}), 400
          
-        if not livros_collection.find_one({"titulo": novo_livro['titulo']}):  
+        if not livros_collection.find_one({"isbn": isbn}):  
             result = livros_collection.insert_one(novo_livro)
             novo_livro['_id'] = str(result.inserted_id)
-            return jsonify(novo_livro)
+            return jsonify(novo_livro), 201
+        else:
+            return jsonify({"mensagem": "Livro já existe no banco de dados"}), 409
     
     except TypeError:
         return jsonify({"erro": "O Corpo da requisição deve ser um JSON válido!" }), 400
@@ -65,37 +72,38 @@ def obter_livros():
     except Exception as e:
         return jsonify({"erro": f"Ocorreu um erro inesperado {str(e)}"}), 500
 
-#Obtendo um livro específico pelo ID
-@app.route('/livros/<string:id>', methods=['GET'])
-def obter_livro_id(id):
+#Obtendo um livro específico pelo ISBN
+@app.route('/livros/<string:isbn>', methods=['GET'])
+def obter_livro_isbn(isbn):
     try:
-        livro = livros_collection.find_one({"_id": ObjectId(id)}) #buscando livro por ObjectId
+        
+        livro = livros_collection.find_one({"isbn": isbn}) #buscando livro por ObjectId
         
         if livro: #se o livro for encontrado converte o objectId para uma string e retorna
             livro['_id'] = str(livro['_id'])
             return jsonify(livro)
         else: #se não for encontrado retorna um erro
-            return jsonify({"erro": "Livro não encontrado!"})
+            return jsonify({"erro": "Livro não encontrado!"}), 404
         
     except PyMongoError as e:
         return jsonify({"erro": f"Erro no banco de dados {str(e)}"}), 500
     except Exception as e:
         return jsonify({"erro": f"Ocorreu um erro inesperado {str(e)}"}), 500  
 
-#Editando um livro específico pelo ID
-@app.route('/livros/<string:id>', methods=['PUT'])
-def editar_livro_id(id):
+#Editando um livro específico pelo ISBN
+@app.route('/livros/<string:isbn>', methods=['PUT'])
+def editar_livro_isbn(isbn):
     try:
         livro_editado = request.get_json()
+
+        if not livro_editado:
+            return jsonify({"erro": "Dados ausentes"}), 400
         
         # Remove o campo _id se estiver presente nos dados enviados
         if '_id' in livro_editado:
             del livro_editado['_id']
-        
-        if not livro_editado:
-            return jsonify({"erro": "Dados ausentes"}), 400
 
-        resultado = livros_collection.update_one({"_id": ObjectId(id)}, {"$set": livro_editado})
+        resultado = livros_collection.update_one({"isbn": isbn}, {"$set": livro_editado})
         
         if resultado.matched_count == 0:
             return jsonify({"erro": "Livro não encontrado"}), 404
@@ -107,16 +115,16 @@ def editar_livro_id(id):
     except Exception as e:
         return jsonify({"erro": f"Ocorreu um erro inesperado {str(e)}"}), 500  
     
-#Excluir livro específico por ID
-@app.route('/livros/<string:id>', methods=['DELETE'])
-def excluir_livro_id(id):
+#Excluir livro específico por ISBN
+@app.route('/livros/<string:isbn>', methods=['DELETE'])
+def excluir_livro_id(isbn):
     try:
-        livro = livros_collection.find_one({"_id": ObjectId(id)})
+        livro = livros_collection.find_one({"isbn": isbn})
        
         if not livro:
             return jsonify({"erro": "Livro não encontrado"}), 404
        
-        resultado = livros_collection.delete_one({"_id": ObjectId(id)})
+        resultado = livros_collection.delete_one({"isbn": isbn})
        
         if resultado.deleted_count == 1:
             return jsonify({"mensagem": "Livro excluido com sucesso!"})
