@@ -3,6 +3,7 @@ from flask_jwt_extended import (create_access_token, jwt_required, JWTManager, g
 from pymongo.errors import PyMongoError #Tratamento de erros no banco de dados Mongo
 from bson.objectid import ObjectId #Buscar ID no banco de dados
 from dotenv import load_dotenv #Carregar os arquivos do .env
+from flask_cors import CORS
 import os
 
 load_dotenv() #carregando as variaveis do ambiente virtual
@@ -14,6 +15,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient
 
 app = Flask(__name__)
+CORS(app)
 
 app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY")
 jwt = JWTManager(app) #INICIALIZANDO 
@@ -158,6 +160,22 @@ def cadastro():
     return jsonify({
         "message": "Usuário cadastrado com sucesso!"
     }), 201
+    
+#OBTER USUARIOS
+@app.route('/usuarios', methods=['GET'])
+@jwt_required()
+def obter_usuarios():
+    try:
+        usuarios = usuarios_collection.find({}, {"_id": 0, "password": 0})
+        
+        if usuarios:
+            return jsonify(list(usuarios))
+        return jsonify({"mensagem": "Nenhum usuário cadastrado!"})
+
+    except PyMongoError as e:
+        return jsonify({"mensagem": f"Erro no banco de dados {str(e)}"}), 500
+    except Exception as e:
+        return jsonify({"mensagem": f"Ocorreu um erro inesperado {str(e)}"}), 500
     
 #AUTENTICAÇÃO
 @app.route('/login', methods=['POST'])
